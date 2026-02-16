@@ -906,6 +906,226 @@ function generateDroneAndWeave() {
   return [v0, v1, v2];
 }
 
+// ── Technique Pieces (after real experimental composers) ──────
+
+function generateClappingMusic() {
+  // After Steve Reich's "Clapping Music" (1972)
+  // A 12-unit rhythmic pattern; V0 stays fixed, V1 and V2 shift progressively
+  const pat = [1,1,1,0,1,1,0,1,0,1,1,0];
+  const dur = 0.5;
+  const cycles = 12;
+  function voice(pitch, shiftRate) {
+    const notes = [];
+    for (let c = 0; c < cycles; c++) {
+      const shift = c * shiftRate;
+      for (let i = 0; i < 12; i++) {
+        notes.push({note: pat[(i+shift)%12] ? pitch : 'REST', dur});
+      }
+    }
+    return notes;
+  }
+  return [voice('C5', 0), voice('E4', 1), voice('G4', 2)];
+}
+
+function generateInC() {
+  // After Terry Riley's "In C" (1964)
+  // Short melodic cells played in sequence; each voice repeats cells different amounts
+  const cells = [
+    [{note:'C4',dur:0.5},{note:'E4',dur:0.5}],
+    [{note:'C4',dur:0.5},{note:'E4',dur:0.5},{note:'C4',dur:0.5},{note:'E4',dur:0.5}],
+    [{note:'E4',dur:0.5},{note:'F4',dur:0.5},{note:'E4',dur:1}],
+    [{note:'REST',dur:0.5},{note:'E4',dur:0.5},{note:'F4',dur:0.5},{note:'E4',dur:0.5}],
+    [{note:'F4',dur:0.5},{note:'G4',dur:2.5}],
+    [{note:'C5',dur:4}],
+    [{note:'G4',dur:0.5},{note:'A4',dur:0.5},{note:'G4',dur:0.5},{note:'F4',dur:0.5}],
+    [{note:'A4',dur:0.5},{note:'G4',dur:0.5},{note:'F4',dur:0.5},{note:'E4',dur:0.5},
+     {note:'F4',dur:1},{note:'C4',dur:2}],
+  ];
+  const reps = [
+    [3,3,4,3,3,2,4,2],
+    [4,4,3,4,2,3,3,2],
+    [2,2,3,3,4,3,3,3],
+  ];
+  function makeVoice(r) {
+    const notes = [];
+    for (let i = 0; i < cells.length; i++)
+      for (let j = 0; j < r[i]; j++)
+        notes.push(...cells[i].map(n => ({...n})));
+    return notes;
+  }
+  return reps.map(makeVoice);
+}
+
+function generateVexations() {
+  // After Erik Satie's "Vexations" (c. 1893)
+  // A short chromatic motif obsessively repeated with shifted transpositions
+  const motif = [
+    {note:'C4',dur:1},{note:'C#4',dur:1},{note:'D4',dur:1},
+    {note:'D#4',dur:1.5},{note:'C4',dur:0.5},{note:'D4',dur:1},
+    {note:'C#4',dur:1},{note:'C4',dur:2},{note:'REST',dur:3}
+  ]; // 12 beats
+  const motifTritone = motif.map(n => ({
+    note: n.note === 'REST' ? 'REST' : transposeNote(n.note, 6), dur: n.dur
+  }));
+  const motifInv = [
+    {note:'E4',dur:1},{note:'D#4',dur:1},{note:'D4',dur:1},
+    {note:'C#4',dur:1.5},{note:'E4',dur:0.5},{note:'D4',dur:1},
+    {note:'D#4',dur:1},{note:'E4',dur:2},{note:'REST',dur:3}
+  ];
+  const v0 = []; for (let i=0;i<6;i++) v0.push(...motif.map(n=>({...n})));
+  const v1 = [{note:'REST',dur:12}];
+  for (let i=0;i<5;i++) v1.push(...motifTritone.map(n=>({...n})));
+  const v2 = [{note:'REST',dur:24}];
+  for (let i=0;i<4;i++) v2.push(...motifInv.map(n=>({...n})));
+  return [v0, v1, v2];
+}
+
+function generateOvertoneStudy() {
+  // After Alvin Lucier's "I Am Sitting in a Room" / drone works
+  // Sustained close intervals creating acoustic beating patterns
+  const v0 = [
+    {note:'C4',dur:8},{note:'C4',dur:8},{note:'C4',dur:8},{note:'C4',dur:8}
+  ];
+  const v1 = [
+    {note:'C4',dur:8},{note:'C#4',dur:8},
+    {note:'C4',dur:4},{note:'D4',dur:4},{note:'C4',dur:8}
+  ];
+  const v2 = [
+    {note:'G4',dur:8},{note:'G4',dur:4},{note:'G#4',dur:4},
+    {note:'G4',dur:8},{note:'G4',dur:8}
+  ];
+  return [v0, v1, v2];
+}
+
+function generateDeepListening() {
+  // After Pauline Oliveros's Deep Listening practice (1988+)
+  // Extremely long tones, barely changing — meditative awareness of sound
+  const v0 = [
+    {note:'E4',dur:12},{note:'F4',dur:12},{note:'E4',dur:12}
+  ];
+  const v1 = [
+    {note:'REST',dur:6},{note:'G4',dur:12},{note:'A4',dur:12},{note:'G4',dur:6}
+  ];
+  const v2 = [
+    {note:'REST',dur:12},{note:'B4',dur:12},{note:'C5',dur:6},{note:'B4',dur:6}
+  ];
+  return [v0, v1, v2];
+}
+
+function generateTempoCanon() {
+  // After Conlon Nancarrow's Studies for Player Piano (1948–92)
+  // Same melody played simultaneously at three different speeds
+  const melody = ['C4','D4','E4','G4','A4','G4','E4','D4'];
+  function rep(dur, times) {
+    const notes = [];
+    for (let t = 0; t < times; t++)
+      for (const n of melody) notes.push({note:n, dur});
+    return notes;
+  }
+  return [rep(1, 6), rep(1.5, 4), rep(2, 3)];
+}
+
+function generateKotekan() {
+  // After Balinese gamelan kotekan — interlocking (hocket) technique
+  // Two melodic parts interleave to form a complete pattern
+  const d = 0.5;
+  const cyA0 = [
+    {note:'C4',dur:d},{note:'REST',dur:d},{note:'E4',dur:d},{note:'REST',dur:d},
+    {note:'G4',dur:d},{note:'REST',dur:d},{note:'G4',dur:d},{note:'REST',dur:d}
+  ];
+  const cyA1 = [
+    {note:'REST',dur:d},{note:'D4',dur:d},{note:'REST',dur:d},{note:'F4',dur:d},
+    {note:'REST',dur:d},{note:'A4',dur:d},{note:'REST',dur:d},{note:'F4',dur:d}
+  ];
+  const cyA2 = [{note:'C5',dur:2},{note:'G4',dur:2}];
+  const cyB0 = [
+    {note:'E4',dur:d},{note:'REST',dur:d},{note:'G4',dur:d},{note:'REST',dur:d},
+    {note:'B4',dur:d},{note:'REST',dur:d},{note:'B4',dur:d},{note:'REST',dur:d}
+  ];
+  const cyB1 = [
+    {note:'REST',dur:d},{note:'F4',dur:d},{note:'REST',dur:d},{note:'A4',dur:d},
+    {note:'REST',dur:d},{note:'C5',dur:d},{note:'REST',dur:d},{note:'A4',dur:d}
+  ];
+  const cyB2 = [{note:'E5',dur:2},{note:'C5',dur:2}];
+  function rep(c,n){const r=[];for(let i=0;i<n;i++)r.push(...c.map(x=>({...x})));return r;}
+  return [
+    [...rep(cyA0,8),...rep(cyB0,8)],
+    [...rep(cyA1,8),...rep(cyB1,8)],
+    [...rep(cyA2,8),...rep(cyB2,8)]
+  ];
+}
+
+function generateAdditive() {
+  // After Philip Glass's additive process ("Music in Fifths", 1969)
+  // A pattern that grows by adding notes, then contracts
+  const full = ['C4','D4','E4','F4','G4','A4','G4','F4'];
+  const phases = [
+    {len:2,reps:4},{len:3,reps:4},{len:5,reps:3},
+    {len:8,reps:3},{len:5,reps:3},{len:3,reps:3},{len:2,reps:4}
+  ];
+  function makeVoice(startPhase) {
+    const notes = [];
+    let rest = 0;
+    for (let i = 0; i < startPhase; i++) rest += phases[i].len * phases[i].reps;
+    if (rest > 0) notes.push({note:'REST',dur:rest});
+    for (let p = startPhase; p < phases.length; p++)
+      for (let r = 0; r < phases[p].reps; r++)
+        for (let i = 0; i < phases[p].len; i++)
+          notes.push({note: full[i], dur: 1});
+    return notes;
+  }
+  return [makeVoice(0), makeVoice(1), makeVoice(2)];
+}
+
+function generateFeldmanSketch() {
+  // After Morton Feldman's late works (e.g. "For Philip Guston", 1984)
+  // Very sparse, widely-spaced notes separated by long silences
+  const v0 = [
+    {note:'E4',dur:3},{note:'REST',dur:5},
+    {note:'D4',dur:2},{note:'REST',dur:6},
+    {note:'F4',dur:4},{note:'REST',dur:4},
+    {note:'E4',dur:2},{note:'REST',dur:6},
+    {note:'C4',dur:4},{note:'REST',dur:4}
+  ];
+  const v1 = [
+    {note:'REST',dur:4},{note:'B4',dur:2},{note:'REST',dur:6},
+    {note:'A4',dur:3},{note:'REST',dur:5},
+    {note:'REST',dur:4},{note:'C5',dur:2},{note:'REST',dur:6},
+    {note:'B4',dur:3},{note:'REST',dur:5}
+  ];
+  const v2 = [
+    {note:'REST',dur:8},{note:'G4',dur:4},{note:'REST',dur:8},
+    {note:'REST',dur:4},{note:'A4',dur:4},{note:'REST',dur:8},
+    {note:'G4',dur:4}
+  ];
+  return [v0, v1, v2];
+}
+
+function generateModes() {
+  // After Olivier Messiaen's Modes of Limited Transposition (1944)
+  // Both whole-tone scales played simultaneously
+  const wt0 = ['C4','D4','E4','F#4','G#4','A#4'];
+  const wt1 = ['C#4','D#4','F4','G4','A4','B4'];
+  const v0 = [];
+  for (let i = 0; i < wt0.length - 2; i++)
+    v0.push({note:wt0[i],dur:1},{note:wt0[i+1],dur:1},{note:wt0[i+2],dur:1});
+  for (let i = wt0.length - 1; i >= 2; i--)
+    v0.push({note:wt0[i],dur:1},{note:wt0[i-1],dur:1},{note:wt0[i-2],dur:1});
+  v0.push({note:'C4',dur:3},{note:'REST',dur:3});
+  const v1 = [{note:'REST',dur:3}];
+  for (let i = 0; i < wt1.length - 2; i++)
+    v1.push({note:wt1[i],dur:1},{note:wt1[i+1],dur:1},{note:wt1[i+2],dur:1});
+  for (let i = wt1.length - 1; i >= 2; i--)
+    v1.push({note:wt1[i],dur:1},{note:wt1[i-1],dur:1},{note:wt1[i-2],dur:1});
+  v1.push({note:wt1[0],dur:3});
+  const v2 = [{note:'REST',dur:6}];
+  for (let i = 0; i < wt0.length; i++)
+    v2.push({note:wt0[i],dur:1},{note:wt1[i],dur:1});
+  for (let i = wt0.length - 1; i >= 0; i--)
+    v2.push({note:wt1[i],dur:1},{note:wt0[i],dur:1});
+  return [v0, v1, v2];
+}
+
 // ── Pieces Array ──────────────────────────────────────────────
 
 const PIECES = [
@@ -989,6 +1209,87 @@ const PIECES = [
     timeSignature: [4, 4],
     defaultBPM: 72,
     voices: generateDroneAndWeave(),
+  },
+  // ── Technique Pieces ──
+  {
+    id: 'clapping-music',
+    title: 'Clapping Music',
+    description: 'After Steve Reich (1972) — rhythmic pattern with progressive phase shifting',
+    timeSignature: [4, 4],
+    defaultBPM: 120,
+    voices: generateClappingMusic(),
+  },
+  {
+    id: 'in-c',
+    title: 'In C',
+    description: 'After Terry Riley (1964) — short melodic cells repeated at different rates',
+    timeSignature: [4, 4],
+    defaultBPM: 108,
+    voices: generateInC(),
+  },
+  {
+    id: 'vexations',
+    title: 'Vexations',
+    description: 'After Erik Satie (c. 1893) — obsessive chromatic motif with tritone transposition',
+    timeSignature: [3, 4],
+    defaultBPM: 56,
+    voices: generateVexations(),
+  },
+  {
+    id: 'overtone-study',
+    title: 'Overtone Study',
+    description: 'After Alvin Lucier — sustained close intervals creating acoustic beating',
+    timeSignature: [4, 4],
+    defaultBPM: 52,
+    voices: generateOvertoneStudy(),
+  },
+  {
+    id: 'deep-listening',
+    title: 'Deep Listening',
+    description: 'After Pauline Oliveros (1988) — extremely long tones, meditative awareness',
+    timeSignature: [4, 4],
+    defaultBPM: 44,
+    voices: generateDeepListening(),
+  },
+  {
+    id: 'tempo-canon',
+    title: 'Tempo Canon',
+    description: 'After Conlon Nancarrow (1948–92) — same melody at three different speeds',
+    timeSignature: [4, 4],
+    defaultBPM: 100,
+    voices: generateTempoCanon(),
+  },
+  {
+    id: 'kotekan',
+    title: 'Kotekan',
+    description: 'After Balinese gamelan — interlocking hocket patterns between voices',
+    timeSignature: [4, 4],
+    defaultBPM: 126,
+    voices: generateKotekan(),
+  },
+  {
+    id: 'additive',
+    title: 'Additive',
+    description: 'After Philip Glass (1969) — pattern grows by adding notes then contracts',
+    timeSignature: [4, 4],
+    defaultBPM: 116,
+    voices: generateAdditive(),
+  },
+  {
+    id: 'feldman-sketch',
+    title: 'Feldman Sketch',
+    description: 'After Morton Feldman (1984) — sparse notes separated by long silences',
+    timeSignature: [4, 4],
+    defaultBPM: 44,
+    voices: generateFeldmanSketch(),
+  },
+  {
+    id: 'modes',
+    title: 'Modes',
+    description: 'After Olivier Messiaen (1944) — both whole-tone scales in simultaneous motion',
+    timeSignature: [3, 4],
+    defaultBPM: 72,
+    voices: generateModes(),
   },
 ];
 
